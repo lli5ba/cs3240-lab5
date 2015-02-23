@@ -4,21 +4,30 @@ import sqlite3
 __author__ = 'lli5ba'
 
 
-def load_course_database(db_name, scv_filename):
+def instructor_numbers(dept_id):
+    db_name = "course1.db"
     conn = sqlite3.connect(db_name)
+    professors = {}
+    with conn:
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM coursedata")
 
-    with open(scv_filename, 'rU') as csvfile:
-            reader = csv.reader(csvfile)
-            for row in reader:
-                tupRow = tuple(row)
-                with conn:
-                    cur = conn.cursor()
-                    sql_cmd = "insert into coursedata values(?, ?, ?, ?, ?, ?, ?)"
-                    cur.execute(sql_cmd, tupRow)
+        rows = cur.fetchall()
+
+        for row in rows:
+            instructor = row[6]
+            students = row[4]
+            if(row[0] == dept_id):
+                if instructor in professors:
+                    new_val = professors[instructor] + students
+                    professors[instructor] = new_val
+                else:
+                    professors[instructor] = students
+    return professors
+
 
 
 if __name__ == "__main__":
     print ("")
-    load_course_database("course1.db", "seas-courses-5years.csv")
-
+    print(instructor_numbers("APMA"))
     # tuple() turns list into tuple
